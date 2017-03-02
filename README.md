@@ -38,8 +38,8 @@ $ bundle exec ruby team_lunch.rb config/input.yml.example
 ### Testing
 ```
 $ bundle exec rspec spec
-.....................
+....................
 
-Finished in 0.00522 seconds (files took 0.10903 seconds to load)
-XX examples, 0 failures
+Finished in 0.00556 seconds (files took 0.07769 seconds to load)
+20 examples, 0 failures
 ```

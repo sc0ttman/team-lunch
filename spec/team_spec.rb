@@ -10,16 +10,28 @@ describe 'Team' do
   let(:team) { Team.new(total_meals: 50, specality_meal_data: team_requirements , restaurant_data:[rest1, rest2, rest3,  rest4]) }
 
   context 'utility methods' do
+    # create_meal_type_hash
     it 'processes required_meal data' do
       expect(team.required_meals).to match_array({ vegetarian: 5, gluten_free: 1, no_restriction: 44 })
     end
 
+    # restaurantify
     it 'processes restaurant data' do
       expect(team.restaurants.size).to eq 4
     end
 
     it 'orders restaurants by rating' do
       expect(team.restaurants.collect{|rest| rest.rating}).to eq([5,5,4,1])
+    end
+
+    it '#create_meal_type_hash creates a hash inclusing no_restriction types' do
+      expect(
+        team.send(:create_meal_type_hash, 50, [[:vegetarian, 35], [:gluten_free, 5]])
+      ).to match_array({ vegetarian: 35, gluten_free: 5, no_restriction: 10 })
+    end
+
+    it '#restaurantify creates an array of restaurant objects' do
+      expect(team.send(:restaurantify, [rest2]).first.name).to eq 'Restaurant B'
     end
   end
 
