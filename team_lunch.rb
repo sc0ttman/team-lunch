@@ -1,10 +1,6 @@
 #!/usr/bin/env ruby
 
-require 'yaml'
-require 'active_support/inflector'
-require './lib/team'
-require './lib/restaurant'
-require './lib/meal'
+require './lib/team_lunch'
 
 file_path = ARGV[0] || 'config/input.yml.example'
 team_config = YAML.load_file(file_path)

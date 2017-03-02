@@ -1,5 +1,5 @@
-Author: Scott Luedtke
-Date: Mar 2, 2017
+##### Author: Scott Luedtke
+##### Date: Mar 2, 2017
 
 ### Problem
 
@@ -14,22 +14,27 @@ Restaurant B has a rating of 3/5 and can serve 100 meals including 20 vegetarian
 Expected meal orders: Restaurant A (4 vegetarian + 36 others), Restaurant B (1 vegetarian + 7 gluten free + 2 others)
 
 ### Assumptions
-
-
-### Requirements
-* rspec
+* Input will be from `.yml` files in `config` folder.
 
 ### Usage
-* copy and customize `config/input.yml.example`
-* from console run:
-```sh
-$ ruby team_lunch.rb config/input.yml.example
+```
+bundle install
+```
+
+Copy and customize
+```
+config/input.yml.example
+```
+
+From console run:
+```
+$ bundle exec ruby team_lunch.rb config/input.yml.example
 => Expected meal orders: Restaurant A (4 vegetarian + 36 others), Restaurant B (1 vegetarian + 7 gluten free + 2 others)
 ```
 
 ### Testing
-```sh
-$ rspec spec
+```
+$ bundle exec rspec spec
 .....................
 
 Finished in 0.00522 seconds (files took 0.10903 seconds to load)

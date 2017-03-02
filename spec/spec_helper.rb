@@ -17,12 +17,7 @@
 #
 # See http://rubydoc.info/gems/rspec-core/RSpec/Core/Configuration
 
-# require_relative '../team_lunch'
-require 'yaml'
-require 'active_support/inflector'
-require './lib/team'
-require './lib/restaurant'
-require './lib/meal'
+require_relative '../lib/team_lunch'
 
 RSpec.configure do |config|
   # rspec-expectations config goes here. You can use an alternate
