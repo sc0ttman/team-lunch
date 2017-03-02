@@ -14,9 +14,12 @@ Restaurant B has a rating of 3/5 and can serve 100 meals including 20 vegetarian
 Expected meal orders: Restaurant A (4 vegetarian + 36 others), Restaurant B (1 vegetarian + 7 gluten free + 2 others)
 
 ### Assumptions
-* Input will be from `.yml` files in `config` folder.
+* Input data will be loaded using `.yml` files like those in `config` folder
+* Data will load properly. All required params will be passed to objects.
+* No error messages are shown when restaurants cannot fulfill the needs of a Team
 
 ### Usage
+
 ```
 bundle install
 ```

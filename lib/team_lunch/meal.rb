@@ -1,9 +1,11 @@
+# Models all meals including non-restricted
+
 class Meal
   attr_accessor :restriction
 
   # Keys to human-readable names
   RESTRICTIONS = {
-    no_restriction: 'Other', # Currently valid. May change this.
+    no_restriction: 'Other',
     vegetarian: 'Vegetarian',
     gluten_free: 'Gluten free',
     nut_free: 'Nut free',

@@ -1,10 +1,12 @@
-# Expects a rating and a set of rules describing what it is able to output
-# Keeps track of meal type counts
-# Input stock_data:
-#  2d array of meal restriction keys and counts:  [[:vegetarian, 5], [:fish_free, 1]]
+# Keeps track of what a restaurant can and has cooked.
+# Builds strings used in output of orders.
+# Input
+#  stock:
+#    Hash of meal types and counts that this restaurant is currently able to cook
 #
 class Restaurant
   attr_accessor :name, :rating, :total_stock_limit, :available_stock, :filled_orders
+
   def initialize(name:, rating:0, total_stock_limit:0, stock:{})
     @name              = name
     @rating            = rating
@@ -13,10 +15,12 @@ class Restaurant
     @filled_orders     = {}
   end
 
+  # Is this restaurant still able to fullfill this meal order?
   def can_cook_meal?(restriction)
     @available_stock.has_key?(restriction) && @available_stock[restriction] > 0
   end
 
+  # Cook the meal and update the count
   def cook_meal(restriction)
     return false unless can_cook_meal?(restriction)
 
