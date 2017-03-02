@@ -21,23 +21,27 @@ class Team
   attr_accessor :total_meals, :required_meals, :restaurants, :restaurants_used
   def initialize(total_meals:, specality_meal_data:, restaurant_data:[])
     @total_meals      = total_meals
-    @required_meals   = create_restrictions_hash(total_meals, specality_meal_data)
-    @restaurants      = restaurantify(restaurant_data)
+    @required_meals   = create_meal_type_hash(total_meals, specality_meal_data)
+    @restaurants      = restaurantify(restaurant_data) # Ordered by highest to lowest rating
     @restaurants_used = [] # Restaurants used to fill meals
   end
 
   def unfilled_meals_count
-    required_meals.values.inject { |a, b| a + b }
+    required_meals.values.reduce(:+)
+  end
+
+  def unfilled_meals
+    required_meals.reject{ |k,v| v <= 0 }
   end
 
   def generate_lunch_orders()
     until unfilled_meals_count <= 0
-      restaurants.each do |rest| # Starting with highest rated
-        required_meals.keys.each do |meal_type|
-          until !rest.can_cook_meal?(meal_type) || required_meals[meal_type] <= 0
-            rest.cook_meal(meal_type)
-            required_meals[meal_type] -= 1
-            @restaurants_used << rest unless @restaurants_used.include? rest
+      restaurants.each do |restaurant| # Starting with highest rated
+        unfilled_meals.each do |meal_type, count| # Only check for meals we still need
+          until !restaurant.can_cook_meal?(meal_type) || required_meals[meal_type] <= 0
+            restaurant.cook_meal(meal_type) # restaurant will keep track of meals it cooked
+            required_meals[meal_type] -= 1 # team keeps track of meals it still needs to get cooked
+            @restaurants_used << restaurant unless @restaurants_used.include? restaurant # TODO: Could use Set for uniqueness
           end
         end
       end
@@ -45,7 +49,7 @@ class Team
   end
 
   def print_lunch_orders()
-    @restaurants_used.collect{ |rest| rest.filled_orders_sentence }.join(', ')
+    @restaurants_used.collect{ |restaurant| restaurant.filled_orders_sentence }.join(', ')
   end
 
   private
@@ -53,7 +57,7 @@ class Team
   # Builds hash contaning all needed meal types and their counts.
   # Manually generates the 'no_restriction' meal type and count using the total_meals count
   # Ex converts [[:vegetarian, 5], [:fish_free, 1]]  to { vegetarian: 5, fish_free: 1, no_restriction: 94 } knowing the total of 100
-  def create_restrictions_hash(total_meals, data)
+  def create_meal_type_hash(total_meals, data)
     required_meals = data.collect{ |rule| { DietaryRestriction.new(restriction: rule[0]).restriction => rule[1] } }
     required_meals = required_meals.reduce({}, :merge) # http://stackoverflow.com/a/11856612/6288938
 
@@ -63,13 +67,14 @@ class Team
     required_meals
   end
 
+  # Sandi Metzify :)
   def restaurantify(data)
     restaurants = []
     data.each do |restaurant|
       restaurants << Restaurant.new(name: restaurant[:name], rating: restaurant[:rating], total_stock_limit: restaurant[:total_stock_limit],
-          stock: create_restrictions_hash(restaurant[:total_stock_limit], restaurant[:stock_data] ) )
+          stock: create_meal_type_hash(restaurant[:total_stock_limit], restaurant[:stock_data] ) )
     end
-    # order by highest rating decending
+    # order by rating decending
     restaurants.sort!{ |a,b| a.rating <=> b.rating }.reverse
   end
 end
@@ -135,29 +140,20 @@ class Restaurant
     @available_stock[restriction] -= 1
   end
 
-  def filled_orders_sentence()
-    #  (has a rating of #{@rating}/5 and can serve #{total_stock_limit} meals)
-    "#{@name} (#{translate_filled_orders()})"
+  # Output helper methods
+  # Eg: 'Restaurant A (4 vegetarian + 36 others)'
+  def filled_orders_sentence
+    "#{@name} (#{@filled_orders.collect{|key, count| translate_filled_order(key, count)}.join(' + ')})"
   end
 
-  def translate_filled_orders
-    @filled_orders.collect{|key, count| translate_filled_order(key, count)}.join(' + ')
-  end
-
+  # Eg: '4 vegetarian'
   def translate_filled_order(key,count)
-    "#{count} #{DietaryRestriction::RESTRICTIONS[key].downcase.pluralize(count)}"
+    meal_translation = DietaryRestriction::RESTRICTIONS[key].downcase
+    meal_translation = meal_translation.pluralize(count) if key == :no_restriction # eg: '4 others'
+
+    "#{count} #{meal_translation}"
   end
 
-  # private
-  # def populate_restrictions(data)
-  #   restrictions = data.collect{ |rule| { DietaryRestriction.new(restriction: rule[0]).restriction => rule[1] } }
-  #   restrictions = restrictions.reduce({}, :merge) # http://stackoverflow.com/a/11856612/6288938
-  #
-  #   # Manually create 'no_restriction' restriction and count by subtracting restricted meals totals from total_stock_limit
-  #   restriction_meal_total_count = restrictions.values.inject { |a, b| a + b }
-  #   restrictions[DietaryRestriction.new().restriction] = @total_stock_limit - restriction_meal_total_count
-  #   restrictions
-  # end
 end
 
 
@@ -218,16 +214,12 @@ describe 'team_lunch' do
       end
     end
 
-    context '#can_cook_meal?' do
+    context 'fulfilling orders (cooking meals)' do
+      before { restaurant.cook_meal(:no_restriction) }
+
       it 'checks if the restaurant is able to cook a meal type' do
         expect(restaurant.can_cook_meal?(:popcorn)).to eq false
         expect(restaurant.can_cook_meal?(:vegetarian)).to eq true
-      end
-    end
-
-    context '#cook_meal' do
-      before do
-        restaurant.cook_meal(:no_restriction)
       end
 
       it 'decreases a counter when a certan meal type is cooked' do
@@ -264,28 +256,28 @@ describe 'team_lunch' do
       end
     end
 
-    context '#unfilled_meals_count' do
+    context 'unfilled meals' do
+      before { team.required_meals = { no_restriction: 5, vegetarian: 0, fish_free: 0 }}
+
       it 'returns count of meals not yet cooked' do
-        expect(team.unfilled_meals_count).to eq 50
+        expect(team.unfilled_meals_count).to eq 5
+      end
+
+      it 'returns all meal types that are still required to fill' do
+        expect(team.unfilled_meals).to match_array({ no_restriction: 5 })
       end
     end
 
-    context '#generate_lunch_orders' do
-      before do
-        team.generate_lunch_orders
-      end
+    context 'generating lunch orders' do
+      before { team.generate_lunch_orders }
+
       it 'returns count of meals not yet cooked' do
         expect(team.restaurants_used.empty?).to eq false
         expect(team.restaurants_used.length).to eq 3
       end
-    end
 
-    context '#print_lunch_orders' do
-      before do
-        team.generate_lunch_orders
-      end
-      it 'returns count of meals not yet cooked' do
-        expect(team.print_lunch_orders).to eq "Restaurant D (2 others), Restaurant A (4 vegetarians + 35 others), Restaurant B (1 vegetarian + 1 gluten free + 7 others)"
+      it 'prints results of ordered meals' do
+        expect(team.print_lunch_orders).to eq "Restaurant D (2 others), Restaurant A (4 vegetarian + 35 others), Restaurant B (1 vegetarian + 1 gluten free + 7 others)"
       end
     end
 
