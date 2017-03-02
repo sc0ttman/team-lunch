@@ -1,0 +1,40 @@
+:total_meals: 90
+:specality_meal_data:
+  - - :nut_free
+    - 18
+  - - :gluten_free
+    - 7
+  - - :fish_free
+    - 27
+  - - :vegetarian
+    - 20
+:restaurant_data:
+  -
+    :name: 'Restaurant 1'
+    :rating: 1
+    :total_stock_limit: 80
+    :stock_data:
+      - - :vegetarian
+        - 50
+      - - :nut_free
+        - 24
+  -
+    :name: 'Restaurant 2'
+    :rating: 3
+    :total_stock_limit: 150
+    :stock_data:
+      - - :vegetarian
+        - 15
+      - - :gluten_free
+        - 20
+      - - :nut_free
+        - 14
+  -
+    :name: 'Restaurant 3'
+    :rating: 4
+    :total_stock_limit: 40
+    :stock_data:
+      - - :fish_free
+        - 30
+      - - :nut_free
+        - 1

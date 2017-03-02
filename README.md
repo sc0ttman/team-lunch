@@ -20,12 +20,11 @@ Expected meal orders: Restaurant A (4 vegetarian + 36 others), Restaurant B (1 v
 * rspec
 
 ### Usage
-```ruby
-irb:0> require './team_lunch.rb'
-irb:1> team=Team.new(total_meals: 50, specality_meal_data: [[:vegetarian, 5], [:gluten_free, 7]], restaurant_data: [{ name: 'Restaurant A', rating: 5, total_stock_limit: 40, stock_data: [[:vegetarian, 4]] },{ name: 'Restaurant B', rating: 3, total_stock_limit: 100, stock_data: [[:vegetarian, 20], [:gluten_free, 20]] } ])
-irb:2> team.generate_lunch_orders
-irb:3> team.print_lunch_orders
-=> "Restaurant A (4 vegetarian + 36 others), Restaurant B (1 vegetarian + 7 gluten free + 2 others)"
+* copy and customize `config/input.yml.example`
+* from console run:
+```sh
+$ ruby team_lunch.rb config/input.yml.example
+=> Expected meal orders: Restaurant A (4 vegetarian + 36 others), Restaurant B (1 vegetarian + 7 gluten free + 2 others)
 ```
 
 ### Testing

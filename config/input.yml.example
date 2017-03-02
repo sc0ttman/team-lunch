@@ -1,0 +1,23 @@
+:total_meals: 50
+:specality_meal_data:
+  - - :vegetarian
+    - 5
+  - - :gluten_free
+    - 7
+:restaurant_data:
+  -
+    :name: 'Restaurant A'
+    :rating: 5
+    :total_stock_limit: 40
+    :stock_data:
+      - - :vegetarian
+        - 4
+  -
+    :name: 'Restaurant B'
+    :rating: 3
+    :total_stock_limit: 100
+    :stock_data:
+      - - :vegetarian
+        - 20
+      - - :gluten_free
+        - 20
